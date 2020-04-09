@@ -182,21 +182,11 @@ bool SceneTab::RenderWindowContent()
 
         Camera* camera = GetCamera();
         Node* cameraNode = camera->GetNode();
-        float length = 1;
-        // if (!selectedNodes_.empty())
-        // {
-        //     Vector3 posSum;
-        //     for (Node* node : selectedNodes_)
-        //         posSum += node->GetWorldPosition();
-        //     length = ((posSum / selectedNodes_.size()) - cameraNode->GetWorldPosition()).Length();
-        // }
-        Matrix4 view = camera->GetView().ToMatrix4();
-        view = view.Transpose();
+        float length = 10;
+        Matrix4 view = camera->GetView().ToMatrix4().Transpose();
+        GetScene()->GetComponent<DebugRenderer>()->AddCross(cameraNode->GetWorldPosition() + cameraNode->GetWorldDirection() * length, 0.5f, Color::RED, false);
         ImGuizmo::ViewManipulate(&view.m00_, length, pos, size, 0);
-        view = view.Transpose().Inverse();
-        // if (!selectedNodes_.empty())
-        //     cameraNode->SetPosition(view.Translation());
-        cameraNode->SetRotation(view.Rotation());
+        cameraNode->SetWorldTransform(Matrix3x4(view.Transpose().Inverse()));
 
         // Eat click event so selection does not change.
         if (ui::IsItemClicked(MOUSEB_LEFT))
