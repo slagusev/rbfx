@@ -67,18 +67,13 @@ else ()
     target_compile_definitions(Civetweb PRIVATE -DNO_SSL)
 endif ()
 
-check_c_source_compiles("
-#if _WIN32
-#include <winsock2.h>
-#else
-#include <poll.h>
-#endif
-int main()
-{
-    struct pollfd fd;
-    return 0;
-}
-" HAVE_POLL)
+include(CheckFunctionExists)
+if (WIN32)
+    check_struct_has_member(pollfd fd winsock2.h HAVE_POLL)
+else ()
+    set (CMAKE_REQUIRED_INCLUDES sys/poll.h)
+    check_function_exists(poll HAVE_POLL)
+endif ()
 if (HAVE_POLL)
     target_compile_definitions(Civetweb PRIVATE -DHAVE_POLL=1)
 endif ()
